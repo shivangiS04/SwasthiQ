@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Flask API Server for EMR Appointment Management System
+SwasthiQ Appointment Management API Server
 Provides HTTP endpoints for the React frontend to interact with the Python backend
 """
 
@@ -181,12 +181,15 @@ def health_check():
     """Health check endpoint"""
     return jsonify({
         'success': True,
-        'message': 'EMR Appointment API is running',
+        'message': 'SwasthiQ Appointment API is running',
+        'version': '1.0.0',
         'timestamp': datetime.now().isoformat()
     })
 
 if __name__ == '__main__':
-    print("Starting EMR Appointment Management API Server...")
-    print("API will be available at: http://localhost:5000")
-    print("Health check: http://localhost:5000/api/health")
+    print("🏥 Starting SwasthiQ Appointment Management API Server...")
+    print("👩‍💻 Developed by Shivangi Singh")
+    print("📍 API will be available at: http://localhost:5000")
+    print("🔍 Health check: http://localhost:5000/api/health")
+    print("📚 Documentation: See README.md for API endpoints")
     app.run(debug=True, host='0.0.0.0', port=5000)

@@ -1,14 +1,17 @@
 {
-  "name": "emr-appointment-management",
+  "name": "swasthiq-appointment-system",
   "version": "1.0.0",
-  "description": "EMR Appointment Management System for healthcare providers",
+  "description": "SwasthiQ - Modern Healthcare Appointment Management Platform",
   "main": "index.js",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "lint": "eslint src --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "start:api": "cd backend && python api_server.py",
+    "test:backend": "cd tests/backend && python3 -m pytest test_appointment_service.py -v"
   },
   "dependencies": {
     "lucide-react": "^0.263.1",
@@ -16,6 +19,8 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.28.5",
+    "@babel/preset-react": "^7.28.5",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^14.4.3",
@@ -23,18 +28,33 @@
     "@types/react-dom": "^18.2.7",
     "@vitejs/plugin-react": "^4.0.3",
     "autoprefixer": "^10.4.14",
+    "identity-obj-proxy": "^3.0.0",
     "jest": "^29.6.2",
+    "jest-environment-jsdom": "^30.2.0",
     "postcss": "^8.4.27",
     "tailwindcss": "^3.3.3",
-    "vite": "^4.4.5"
+    "vite": "^4.4.5",
+    "whatwg-fetch": "^3.6.20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shivangi-singh-dev/swasthiq-appointment-system.git"
   },
   "keywords": [
-    "emr",
-    "appointment",
     "healthcare",
+    "appointment-management",
+    "emr",
+    "medical-records",
     "react",
-    "python"
+    "python",
+    "flask",
+    "tailwindcss",
+    "full-stack"
   ],
-  "author": "EMR Development Team",
-  "license": "MIT"
+  "author": "Shivangi Singh <shivangi.singh.dev@gmail.com>",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  }
 }

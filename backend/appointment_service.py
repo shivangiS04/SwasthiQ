@@ -1,5 +1,5 @@
-# EMR Appointment Management System - Backend Service
-# This file will contain the core appointment management logic
+# SwasthiQ Appointment Management System - Backend Service
+# Core appointment management logic and business rules
 
 from dataclasses import dataclass
 from typing import List, Dict, Optional, Union

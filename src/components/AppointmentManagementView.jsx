@@ -20,28 +20,69 @@ const AppointmentManagementView = () => {
   // UI states
   const [showNewAppointmentForm, setShowNewAppointmentForm] = useState(false)
   const [isCreatingAppointment, setIsCreatingAppointment] = useState(false)
+  const [connectionStatus, setConnectionStatus] = useState('checking') // checking, connected, disconnected
+
+  // Check API connection on mount
+  useEffect(() => {
+    checkConnection()
+  }, [])
+
+  const checkConnection = async () => {
+    try {
+      await appointmentService.healthCheck()
+      setConnectionStatus('connected')
+    } catch (err) {
+      setConnectionStatus('disconnected')
+      setError('Unable to connect to the appointment service. Please ensure the API server is running on port 5000.')
+    }
+  }
 
   // Load appointments on component mount
   useEffect(() => {
-    loadAppointments()
-  }, [])
+    if (connectionStatus === 'connected') {
+      loadAppointments()
+    }
+  }, [connectionStatus])
 
   // Apply filters when appointments or filter states change
   useEffect(() => {
     applyFilters()
   }, [appointments, selectedDate, activeTab])
 
-  const loadAppointments = async () => {
+  const loadAppointments = async (showLoadingSpinner = true) => {
     try {
-      setLoading(true)
+      if (showLoadingSpinner) {
+        setLoading(true)
+      }
       setError(null)
-      const data = await appointmentService.getAppointments()
+      
+      // Add timeout for network requests
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout')), 10000)
+      )
+      
+      const dataPromise = appointmentService.getAppointments()
+      const data = await Promise.race([dataPromise, timeoutPromise])
+      
       setAppointments(data)
     } catch (err) {
-      setError('Failed to load appointments. Please try again.')
+      let errorMessage = 'Failed to load appointments. Please try again.'
+      
+      // Provide specific error messages based on error type
+      if (err.message.includes('timeout')) {
+        errorMessage = 'Request timed out. Please check your connection and try again.'
+      } else if (err.message.includes('Failed to fetch')) {
+        errorMessage = 'Unable to connect to the server. Please ensure the API server is running.'
+      } else if (err.message.includes('NetworkError')) {
+        errorMessage = 'Network error. Please check your internet connection.'
+      }
+      
+      setError(errorMessage)
       console.error('Error loading appointments:', err)
     } finally {
-      setLoading(false)
+      if (showLoadingSpinner) {
+        setLoading(false)
+      }
     }
   }
 
@@ -93,10 +134,21 @@ const AppointmentManagementView = () => {
 
   const handleStatusUpdate = async (appointmentId, newStatus) => {
     try {
+      setError(null) // Clear any existing errors
       await appointmentService.updateAppointmentStatus(appointmentId, newStatus)
-      await loadAppointments() // Refresh data
+      await loadAppointments(false) // Refresh data without showing loading spinner
     } catch (err) {
-      setError('Failed to update appointment status.')
+      let errorMessage = 'Failed to update appointment status.'
+      
+      if (err.message.includes('not found')) {
+        errorMessage = 'Appointment not found. It may have been deleted.'
+      } else if (err.message.includes('timeout')) {
+        errorMessage = 'Update timed out. Please try again.'
+      } else if (err.message.includes('Failed to fetch')) {
+        errorMessage = 'Unable to connect to server. Please check if the API is running.'
+      }
+      
+      setError(errorMessage)
       console.error('Error updating status:', err)
     }
   }
@@ -107,10 +159,21 @@ const AppointmentManagementView = () => {
     }
     
     try {
+      setError(null) // Clear any existing errors
       await appointmentService.deleteAppointment(appointmentId)
-      await loadAppointments() // Refresh data
+      await loadAppointments(false) // Refresh data without showing loading spinner
     } catch (err) {
-      setError('Failed to delete appointment.')
+      let errorMessage = 'Failed to delete appointment.'
+      
+      if (err.message.includes('not found')) {
+        errorMessage = 'Appointment not found. It may have already been deleted.'
+      } else if (err.message.includes('timeout')) {
+        errorMessage = 'Delete operation timed out. Please try again.'
+      } else if (err.message.includes('Failed to fetch')) {
+        errorMessage = 'Unable to connect to server. Please check if the API is running.'
+      }
+      
+      setError(errorMessage)
       console.error('Error deleting appointment:', err)
     }
   }
@@ -118,11 +181,24 @@ const AppointmentManagementView = () => {
   const handleCreateAppointment = async (appointmentData) => {
     setIsCreatingAppointment(true)
     try {
+      setError(null) // Clear any existing errors
       await appointmentService.createAppointment(appointmentData)
-      await loadAppointments() // Refresh data
+      await loadAppointments(false) // Refresh data without showing loading spinner
       setShowNewAppointmentForm(false) // Close form on success
     } catch (err) {
-      setError('Failed to create appointment.')
+      let errorMessage = 'Failed to create appointment.'
+      
+      if (err.message.includes('conflict')) {
+        errorMessage = 'Time slot conflict detected. Please choose a different time.'
+      } else if (err.message.includes('validation')) {
+        errorMessage = 'Invalid appointment data. Please check all fields.'
+      } else if (err.message.includes('timeout')) {
+        errorMessage = 'Create operation timed out. Please try again.'
+      } else if (err.message.includes('Failed to fetch')) {
+        errorMessage = 'Unable to connect to server. Please check if the API is running.'
+      }
+      
+      setError(errorMessage)
       console.error('Error creating appointment:', err)
       throw err // Re-throw to let form handle it
     } finally {
@@ -144,8 +220,8 @@ const AppointmentManagementView = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <div className="flex items-center justify-center min-h-96 fade-in">
+        <div className="loading-spinner h-12 w-12"></div>
         <span className="ml-3 text-lg font-bold text-white">Loading appointments...</span>
       </div>
     )
@@ -153,17 +229,68 @@ const AppointmentManagementView = () => {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      {/* Connection Status Indicator */}
+      {connectionStatus !== 'connected' && (
+        <div className="lg:col-span-4 mb-4">
+          {connectionStatus === 'checking' ? (
+            <div className="bg-yellow-900 border border-yellow-700 text-yellow-100 px-4 py-3 rounded-lg">
+              <div className="flex items-center">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-yellow-400 mr-3"></div>
+                <span className="font-bold">Checking connection to appointment service...</span>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-red-900 border border-red-700 text-red-100 px-4 py-3 rounded-lg">
+              <div className="flex items-start justify-between">
+                <div className="flex items-start">
+                  <div className="bg-red-800 rounded-full p-1 mr-3 mt-0.5">
+                    <X className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="font-bold">Connection Failed</p>
+                    <p>Unable to connect to the appointment service.</p>
+                    <p className="text-sm mt-1">Please ensure the Python API server is running on port 5000.</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={checkConnection}
+                  className="text-sm bg-red-800 hover:bg-red-700 px-3 py-1 rounded transition-colors"
+                >
+                  Retry Connection
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
       {/* Error Display */}
       {error && (
         <div className="lg:col-span-4 bg-red-900 border border-red-700 text-red-100 px-4 py-3 rounded-lg mb-4">
-          <p className="font-bold">Error</p>
-          <p>{error}</p>
-          <button 
-            onClick={() => setError(null)}
-            className="mt-2 text-sm underline hover:no-underline"
-          >
-            Dismiss
-          </button>
+          <div className="flex items-start justify-between">
+            <div className="flex items-start">
+              <div className="bg-red-800 rounded-full p-1 mr-3 mt-0.5">
+                <X className="w-4 h-4" />
+              </div>
+              <div>
+                <p className="font-bold">Error</p>
+                <p>{error}</p>
+              </div>
+            </div>
+            <div className="flex space-x-2 ml-4">
+              <button 
+                onClick={() => loadAppointments()}
+                className="text-sm bg-red-800 hover:bg-red-700 px-3 py-1 rounded transition-colors"
+              >
+                Retry
+              </button>
+              <button 
+                onClick={() => setError(null)}
+                className="text-sm underline hover:no-underline"
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -238,7 +365,7 @@ const AppointmentManagementView = () => {
               </div>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-4 slide-up">
               {filteredAppointments.map(appointment => (
                 <AppointmentCard
                   key={appointment.id}

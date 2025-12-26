@@ -99,7 +99,7 @@ const AppointmentCard = ({
   }
 
   return (
-    <div className={`bg-dark-800 border border-dark-700 rounded-lg p-6 hover:border-dark-600 transition-all duration-200 hover:shadow-lg ${className}`}>
+    <div className={`appointment-card fade-in ${className}`}>
       {/* Header with Patient Name and Status */}
       <div className="flex justify-between items-start mb-4">
         <div className="flex items-center flex-1">
@@ -143,7 +143,7 @@ const AppointmentCard = ({
               </button>
             </div>
           ) : (
-            <span className={`px-3 py-1 rounded-full text-xs font-extrabold border ${getStatusColor(appointment.status)}`}>
+            <span className={`status-badge ${getStatusColor(appointment.status)}`}>
               {appointment.status}
             </span>
           )}

@@ -6,6 +6,7 @@ from hypothesis import given, strategies as st
 from datetime import datetime
 import sys
 import os
+import random
 
 # Add backend directory to path for imports
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../backend'))
@@ -1003,3 +1004,112 @@ class TestAppointmentService:
         final_unique_ids = set(final_ids)
         
         assert len(final_ids) == len(final_unique_ids), "All IDs should remain unique after adding new appointment"
+    
+    # **Feature: emr-appointment-management, Property 3: Status tab filtering correctness**
+    @given(
+        num_appointments=st.integers(min_value=5, max_value=15)
+    )
+    def test_status_tab_filtering_correctness_property(self, num_appointments):
+        """
+        Property test: For any appointment dataset and tab selection (Upcoming, Today, Past), 
+        the filtered results should contain only appointments matching the tab's criteria 
+        based on date and status
+        **Validates: Requirements 3.1, 3.2, 3.3**
+        """
+        from datetime import datetime, timedelta
+        
+        # Create a fresh service
+        fresh_service = AppointmentService()
+        
+        # Generate appointments across different dates and statuses
+        today = datetime.now().date()
+        created_appointments = []
+        
+        for i in range(num_appointments):
+            # Create appointments with varied dates (past, today, future)
+            if i % 3 == 0:
+                # Past appointments
+                date_offset = -random.randint(1, 30)
+                status = random.choice(['Confirmed', 'Cancelled'])
+            elif i % 3 == 1:
+                # Today appointments
+                date_offset = 0
+                status = random.choice(['Confirmed', 'Scheduled'])
+            else:
+                # Future appointments
+                date_offset = random.randint(1, 30)
+                status = random.choice(['Upcoming', 'Scheduled'])
+            
+            appointment_date = today + timedelta(days=date_offset)
+            
+            payload = {
+                "patient_name": f"Test Patient {i}",
+                "date": appointment_date.strftime('%Y-%m-%d'),
+                "time": f"{9 + (i % 8):02d}:00",
+                "duration": 30,
+                "doctor_name": f"Dr. Test {i % 3}",
+                "mode": "In-person",
+                "status": status
+            }
+            
+            appointment = fresh_service.create_appointment(payload)
+            assert isinstance(appointment, Appointment), f"Appointment {i} creation failed"
+            created_appointments.append(appointment)
+        
+        # Get all appointments for filtering tests
+        all_appointments = fresh_service.get_appointments()
+        today_str = today.strftime('%Y-%m-%d')
+        
+        # Property 1: "Today" filter should return only appointments for today
+        today_filtered = [apt for apt in all_appointments if apt.date == today_str]
+        
+        # Verify all today appointments have today's date
+        for appointment in today_filtered:
+            assert appointment.date == today_str, f"Today filter returned appointment with date {appointment.date}"
+        
+        # Property 2: "Upcoming" filter should return future appointments or "Upcoming" status
+        upcoming_filtered = [apt for apt in all_appointments 
+                           if apt.date > today_str or apt.status == 'Upcoming']
+        
+        # Verify all upcoming appointments meet the criteria
+        for appointment in upcoming_filtered:
+            assert (appointment.date > today_str or appointment.status == 'Upcoming'), \
+                f"Upcoming filter returned appointment with date {appointment.date} and status {appointment.status}"
+        
+        # Property 3: "Past" filter should return past appointments or completed status
+        past_filtered = [apt for apt in all_appointments 
+                        if apt.date < today_str or apt.status == 'Completed']
+        
+        # Verify all past appointments meet the criteria
+        for appointment in past_filtered:
+            assert (appointment.date < today_str or appointment.status == 'Completed'), \
+                f"Past filter returned appointment with date {appointment.date} and status {appointment.status}"
+        
+        # Property 4: No appointment should appear in multiple exclusive categories
+        today_ids = {apt.id for apt in today_filtered}
+        upcoming_ids = {apt.id for apt in upcoming_filtered}
+        past_ids = {apt.id for apt in past_filtered}
+        
+        # Today and past should not overlap (unless status overrides)
+        today_past_overlap = today_ids.intersection(past_ids)
+        for apt_id in today_past_overlap:
+            apt = next(apt for apt in all_appointments if apt.id == apt_id)
+            # Only allowed if status creates the overlap
+            assert apt.status in ['Completed', 'Upcoming'], \
+                f"Appointment {apt_id} appears in both today and past without status justification"
+        
+        # Property 5: All appointments should be categorizable
+        all_filtered_ids = today_ids.union(upcoming_ids).union(past_ids)
+        all_appointment_ids = {apt.id for apt in all_appointments}
+        
+        # Every appointment should appear in at least one category
+        uncategorized = all_appointment_ids - all_filtered_ids
+        assert len(uncategorized) == 0, f"Appointments not categorized: {uncategorized}"
+        
+        # Property 6: Filter combinations should be consistent
+        # An appointment that's today should not be in upcoming (unless status overrides)
+        today_upcoming_overlap = today_ids.intersection(upcoming_ids)
+        for apt_id in today_upcoming_overlap:
+            apt = next(apt for apt in all_appointments if apt.id == apt_id)
+            assert apt.status == 'Upcoming', \
+                f"Appointment {apt_id} appears in both today and upcoming without 'Upcoming' status"

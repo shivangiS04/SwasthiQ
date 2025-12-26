@@ -1,0 +1,4 @@
+# Python dependencies for EMR Appointment Management System
+pytest>=7.4.0
+hypothesis>=6.82.0
+python-dateutil>=2.8.2

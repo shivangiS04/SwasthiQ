@@ -392,8 +392,56 @@ class AppointmentService:
         Returns:
             Updated appointment object or error response
         """
-        # Implementation will be added in next task
-        pass
+        # Step 1: Validate the new status value
+        if not validate_status_value(new_status):
+            return self._create_error_response(
+                "VALIDATION_ERROR",
+                f"Invalid status value: {new_status}",
+                {"valid_statuses": ['Confirmed', 'Scheduled', 'Upcoming', 'Cancelled']}
+            )
+        
+        # Step 2: Find the appointment by ID
+        appointment = self.get_appointment_by_id(appointment_id)
+        if appointment is None:
+            return self._create_error_response(
+                "NOT_FOUND",
+                f"Appointment with ID {appointment_id} not found",
+                {"appointment_id": appointment_id}
+            )
+        
+        # Step 3: Update the status in the mock data layer
+        # In a real system, this would trigger an AppSync Subscription
+        # and perform an Aurora transactional write
+        for i, apt in enumerate(self.appointments):
+            if apt.id == appointment_id:
+                # Create a new appointment object with updated status
+                updated_appointment = Appointment(
+                    id=apt.id,
+                    patient_name=apt.patient_name,
+                    date=apt.date,
+                    time=apt.time,
+                    duration=apt.duration,
+                    doctor_name=apt.doctor_name,
+                    status=new_status,  # Updated status
+                    mode=apt.mode
+                )
+                
+                # Replace the appointment in the list
+                self.appointments[i] = updated_appointment
+                
+                # In a real system, this is where we would:
+                # 1. Execute Aurora transactional write: UPDATE appointments SET status = ? WHERE id = ?
+                # 2. Trigger AppSync subscription to notify connected clients
+                # 3. Log the status change for audit purposes
+                
+                return updated_appointment
+        
+        # This should never happen since we already checked if appointment exists
+        return self._create_error_response(
+            "NOT_FOUND",
+            f"Appointment with ID {appointment_id} not found during update",
+            {"appointment_id": appointment_id}
+        )
     
     def delete_appointment(self, appointment_id: str) -> bool:
         """
@@ -405,5 +453,25 @@ class AppointmentService:
         Returns:
             Boolean indicating success of deletion
         """
-        # Implementation will be added in next task
-        return False
+        # Step 1: Find the appointment by ID
+        appointment = self.get_appointment_by_id(appointment_id)
+        if appointment is None:
+            # Handle deletion of non-existent appointments gracefully
+            # In some systems, this might be considered successful (idempotent)
+            # But for clarity, we'll return False to indicate nothing was deleted
+            return False
+        
+        # Step 2: Remove the appointment from the mock data layer
+        # In a real system, this would:
+        # 1. Execute Aurora transactional delete: DELETE FROM appointments WHERE id = ?
+        # 2. Trigger AppSync subscription to notify connected clients
+        # 3. Log the deletion for audit purposes
+        # 4. Potentially archive the appointment instead of hard delete
+        
+        initial_count = len(self.appointments)
+        self.appointments = [apt for apt in self.appointments if apt.id != appointment_id]
+        final_count = len(self.appointments)
+        
+        # Verify that exactly one appointment was removed
+        deleted_count = initial_count - final_count
+        return deleted_count == 1

@@ -41,44 +41,44 @@
     - Return appropriate error messages for conflicts
     - _Requirements: 5.4, 6.1, 6.2, 6.3_
 
-  - [-] 3.3 Write property test for appointment creation validation
+  - [x] 3.3 Write property test for appointment creation validation
     - **Property 5: Appointment creation validation**
     - **Validates: Requirements 5.2**
 
-  - [ ] 3.4 Write property test for conflict detection accuracy
+  - [x] 3.4 Write property test for conflict detection accuracy
     - **Property 6: Conflict detection accuracy**
     - **Validates: Requirements 5.4, 6.1, 6.2, 6.3, 6.4**
 
-  - [ ] 3.5 Write property test for appointment creation round-trip
+  - [x] 3.5 Write property test for appointment creation round-trip
     - **Property 7: Appointment creation round-trip**
     - **Validates: Requirements 5.3, 5.5**
 
 - [ ] 4. Implement appointment status updates and deletion
-  - [ ] 4.1 Create update_appointment_status method
+  - [x] 4.1 Create update_appointment_status method
     - Implement status update logic in mock data layer
     - Validate status values before updating
     - Return updated appointment object
     - _Requirements: 4.1, 4.3_
 
-  - [ ] 4.2 Build delete_appointment method
+  - [x] 4.2 Build delete_appointment method
     - Implement appointment removal from mock data layer
     - Handle deletion of non-existent appointments gracefully
     - Return boolean confirmation of deletion operation
     - _Requirements: 7.1, 7.2, 7.4_
 
-  - [ ] 4.3 Write property test for status update persistence
+  - [x] 4.3 Write property test for status update persistence
     - **Property 4: Status update persistence**
     - **Validates: Requirements 4.1, 4.2, 4.3, 4.4**
 
-  - [ ] 4.4 Write property test for deletion consistency
+  - [x] 4.4 Write property test for deletion consistency
     - **Property 8: Deletion consistency**
     - **Validates: Requirements 7.1, 7.2, 7.3**
 
-  - [ ] 4.5 Write property test for ID uniqueness constraint
+  - [x] 4.5 Write property test for ID uniqueness constraint
     - **Property 9: ID uniqueness constraint**
     - **Validates: Requirements 8.2**
 
-- [ ] 5. Checkpoint - Ensure backend service tests pass
+- [x] 5. Checkpoint - Ensure backend service tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 6. Create core React components structure

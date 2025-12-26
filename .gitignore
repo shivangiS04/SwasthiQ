@@ -129,3 +129,6 @@ temp/
 *.njsproj
 *.sln
 *.sw?
+
+# Old AI tool directories (replaced with .projects)
+.kiro/

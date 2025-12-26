@@ -2,24 +2,9 @@
 
 > **SwasthiQ** (स्वास्थ्य + IQ) combines the Sanskrit word for "health" with "Intelligence Quotient", representing intelligent healthcare management solutions for medical providers worldwide.
 
-A modern, full-stack appointment management platform designed specifically for healthcare providers. Built with React and Python by **Shivangi Singh**, SwasthiQ offers real-time scheduling, intelligent conflict detection, and a professional user interface optimized for medical workflows.
+A modern, full-stack appointment management platform designed specifically for healthcare providers. Built with React and Python , SwasthiQ offers real-time scheduling, intelligent conflict detection, and a professional user interface optimized for medical workflows.
 
-![SwasthiQ Dashboard](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)
-![React](https://img.shields.io/badge/React-18.2.0-blue)
-![Python](https://img.shields.io/badge/Python-3.11+-green)
-![Tests](https://img.shields.io/badge/Tests-31%20Passing-success)
 
-## 👩‍💻 About the Developer
-
-**Shivangi Singh** is a passionate full-stack developer with expertise in modern web technologies and healthcare solutions. This project showcases proficiency in:
-
-- **Frontend Development**: React, JavaScript, Tailwind CSS, Modern UI/UX
-- **Backend Development**: Python, Flask, RESTful APIs, Data Modeling
-- **Testing**: Comprehensive test suites with Jest, Pytest, and Property-based testing
-- **Healthcare Domain**: Understanding of medical workflows and EMR systems
-- **Professional Development**: Clean architecture, documentation, and best practices
-
-*Connect with Shivangi: [GitHub](https://github.com/shivangi-singh-dev) | [LinkedIn](https://linkedin.com/in/shivangi-singh-dev) | [Email](mailto:shivangi.singh.dev@gmail.com)*
 
 ## 🌟 Why SwasthiQ?
 
@@ -31,7 +16,7 @@ Healthcare providers need reliable, efficient tools to manage patient appointmen
 - **Comprehensive Filtering**: Find appointments quickly by date, status, or provider
 - **Mobile Responsive**: Works seamlessly on tablets and mobile devices used in clinical settings
 
-## 🚀 Key Features
+## Key Features
 
 ### Core Appointment Management
 - **Smart Scheduling**: Create appointments with automatic conflict detection
@@ -161,7 +146,7 @@ npm run test:watch
 ✅ Cross-browser compatibility verified
 ```
 
-## 📊 API Documentation
+## API Documentation
 
 ### Base URL
 ```
@@ -223,7 +208,206 @@ All API responses follow this structure:
 }
 ```
 
-## 🏗 Project Structure
+## 🔄 GraphQL Query Structure & Data Consistency
+
+### Technical Architecture Decision: REST vs GraphQL
+
+SwasthiQ implements a **RESTful API architecture** instead of GraphQL for the following technical reasons:
+
+#### Why REST API Was Chosen:
+1. **Simplicity**: Healthcare systems require straightforward, predictable API patterns
+2. **Caching**: HTTP caching works seamlessly with REST endpoints
+3. **Tooling**: Better debugging and monitoring tools for REST APIs
+4. **Team Familiarity**: Faster development with well-understood REST patterns
+5. **Performance**: Direct endpoint mapping reduces query complexity overhead
+
+### Equivalent GraphQL Query Structure
+
+If SwasthiQ were to implement GraphQL, the `getAppointments` function would use this query structure:
+
+```graphql
+# GraphQL Query for fetching appointments with filtering
+query GetAppointments($filters: AppointmentFilters) {
+  appointments(filters: $filters) {
+    id
+    patientName
+    date
+    time
+    duration
+    doctorName
+    status
+    mode
+    createdAt
+    updatedAt
+  }
+}
+
+# GraphQL Input Type for filtering
+input AppointmentFilters {
+  date: String          # YYYY-MM-DD format
+  status: AppointmentStatus
+  doctorName: String
+  patientName: String
+  mode: AppointmentMode
+}
+
+# GraphQL Enums for type safety
+enum AppointmentStatus {
+  CONFIRMED
+  SCHEDULED
+  UPCOMING
+  CANCELLED
+}
+
+enum AppointmentMode {
+  IN_PERSON
+  VIRTUAL
+  PHONE
+}
+```
+
+### Current REST Implementation vs GraphQL Equivalent
+
+| Operation | Current REST Endpoint | GraphQL Equivalent |
+|-----------|----------------------|-------------------|
+| **Get Appointments** | `GET /api/appointments?date=2024-12-27&status=Confirmed` | `query { appointments(filters: {date: "2024-12-27", status: CONFIRMED}) { ... } }` |
+| **Create Appointment** | `POST /api/appointments` | `mutation { createAppointment(input: {...}) { ... } }` |
+| **Update Status** | `PUT /api/appointments/{id}/status` | `mutation { updateAppointmentStatus(id: "...", status: CONFIRMED) { ... } }` |
+| **Delete Appointment** | `DELETE /api/appointments/{id}` | `mutation { deleteAppointment(id: "...") }` |
+
+### Data Consistency Mechanisms
+
+The Python `appointment_service.py` ensures data consistency through several mechanisms:
+
+#### 1. **Transactional Operations**
+```python
+def update_appointment_status(self, appointment_id: str, new_status: str):
+    # Step 1: Validate input
+    if not validate_status_value(new_status):
+        return error_response("VALIDATION_ERROR", "Invalid status")
+    
+    # Step 2: Find appointment (atomic read)
+    appointment = self.get_appointment_by_id(appointment_id)
+    if not appointment:
+        return error_response("NOT_FOUND", "Appointment not found")
+    
+    # Step 3: Atomic update with data integrity
+    for i, apt in enumerate(self.appointments):
+        if apt.id == appointment_id:
+            # Create new immutable appointment object
+            updated_appointment = Appointment(
+                id=apt.id,
+                patient_name=apt.patient_name,
+                date=apt.date,
+                time=apt.time,
+                duration=apt.duration,
+                doctor_name=apt.doctor_name,
+                status=new_status,  # Only status changes
+                mode=apt.mode
+            )
+            # Atomic replacement in data structure
+            self.appointments[i] = updated_appointment
+            return updated_appointment
+```
+
+#### 2. **Conflict Detection & Prevention**
+```python
+def _check_time_conflicts(self, doctor_name: str, date: str, time: str, duration: int):
+    # Parse appointment times with validation
+    new_start = datetime.strptime(f"{date} {time}", "%Y-%m-%d %H:%M")
+    new_end = new_start + timedelta(minutes=duration)
+    
+    conflicts = []
+    for appointment in self.appointments:
+        if (appointment.doctor_name == doctor_name and 
+            appointment.date == date and 
+            appointment.status != 'Cancelled'):
+            
+            existing_start = datetime.strptime(f"{appointment.date} {appointment.time}", "%Y-%m-%d %H:%M")
+            existing_end = existing_start + timedelta(minutes=appointment.duration)
+            
+            # Detect overlapping time slots
+            if (new_start < existing_end) and (existing_start < new_end):
+                conflicts.append(appointment)
+    
+    return conflicts
+```
+
+#### 3. **Data Validation & Integrity**
+```python
+def create_appointment(self, payload: Dict):
+    # Multi-layer validation ensures data consistency
+    
+    # Layer 1: Field validation
+    is_valid, validation_errors = validate_appointment_data(payload)
+    if not is_valid:
+        return error_response("VALIDATION_ERROR", validation_errors)
+    
+    # Layer 2: Business rule validation (conflict detection)
+    conflicts = self._check_time_conflicts(...)
+    if conflicts:
+        return error_response("CONFLICT_ERROR", conflict_details)
+    
+    # Layer 3: Unique ID generation with collision detection
+    new_id = f"apt_{uuid.uuid4().hex[:8]}"
+    while self.get_appointment_by_id(new_id) is not None:
+        new_id = f"apt_{uuid.uuid4().hex[:8]}"
+    
+    # Layer 4: Atomic insertion
+    new_appointment = Appointment(...)
+    self.appointments.append(new_appointment)
+    
+    return new_appointment
+```
+
+#### 4. **Production-Ready Consistency Patterns**
+
+In a production environment, SwasthiQ would implement:
+
+```python
+# Database Transaction Pattern (PostgreSQL/Aurora)
+@transaction.atomic
+def update_appointment_status(self, appointment_id: str, new_status: str):
+    with transaction.atomic():
+        # 1. SELECT FOR UPDATE (row-level locking)
+        appointment = Appointment.objects.select_for_update().get(id=appointment_id)
+        
+        # 2. Validate business rules
+        if not self.validate_status_transition(appointment.status, new_status):
+            raise ValidationError("Invalid status transition")
+        
+        # 3. Update with optimistic locking
+        appointment.status = new_status
+        appointment.updated_at = timezone.now()
+        appointment.version += 1  # Optimistic locking
+        appointment.save()
+        
+        # 4. Trigger real-time updates (WebSocket/GraphQL Subscriptions)
+        self.notify_appointment_updated(appointment)
+        
+        return appointment
+
+# GraphQL Subscription for Real-time Updates
+subscription AppointmentUpdated($doctorName: String!) {
+  appointmentUpdated(doctorName: $doctorName) {
+    id
+    status
+    updatedAt
+  }
+}
+```
+
+### Summary
+
+While SwasthiQ currently uses REST for simplicity and rapid development, the architecture is designed to support GraphQL migration with:
+- **Type-safe queries** through the proposed GraphQL schema
+- **Real-time subscriptions** for appointment updates
+- **Optimistic UI updates** with conflict resolution
+- **Transactional consistency** through proper Python service patterns
+
+The current REST implementation provides the same data consistency guarantees through validation, conflict detection, and atomic operations that would be present in a GraphQL implementation.
+
+##  Project Structure
 
 ```
 swasthiq-appointment-system/
@@ -254,34 +438,8 @@ swasthiq-appointment-system/
 └── README.md               # This file
 ```
 
-## 🎨 Design System
 
-### Color Palette
-SwasthiQ uses a professional healthcare color scheme:
-
-```css
-Primary Blue:    #2563eb  /* Interactive elements, CTAs */
-Dark Background: #0f172a  /* Main application background */
-Card Background: #1e293b  /* Content containers */
-Border Color:    #374151  /* Subtle borders and dividers */
-Text Primary:    #ffffff  /* Primary text content */
-Text Secondary:  #9ca3af  /* Secondary text, labels */
-```
-
-### Status Colors
-```css
-Confirmed:  #10b981  /* Green - confirmed appointments */
-Scheduled:  #3b82f6  /* Blue - newly scheduled */
-Upcoming:   #f59e0b  /* Amber - approaching appointments */
-Cancelled:  #ef4444  /* Red - cancelled appointments */
-```
-
-### Typography
-- **Font Family**: Inter (Google Fonts)
-- **Weights**: 400 (Regular), 600 (Semibold), 700 (Bold), 800 (Extrabold)
-- **Scale**: Consistent 1.25 ratio for hierarchical sizing
-
-## 🔧 Configuration
+##  Configuration
 
 ### Environment Variables
 Create a `.env` file in the root directory:
@@ -309,7 +467,7 @@ class Config:
     CORS_ORIGINS = ['https://your-domain.com']
 ```
 
-## 🚀 Deployment
+##  Deployment
 
 ### Frontend Deployment (Vercel/Netlify)
 ```bash
@@ -346,46 +504,7 @@ docker build -t swasthiq .
 docker run -p 3000:3000 -p 5000:5000 swasthiq
 ```
 
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
-
-### Development Workflow
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Make your changes and add tests
-4. Ensure all tests pass: `npm test && npm run test:backend`
-5. Commit your changes: `git commit -m 'Add amazing feature'`
-6. Push to the branch: `git push origin feature/amazing-feature`
-7. Open a Pull Request
-
-### Code Standards
-- **JavaScript**: ESLint configuration with React best practices
-- **Python**: PEP 8 style guide with type hints
-- **Testing**: Minimum 80% code coverage required
-- **Documentation**: Update README for any new features
-
-## 📈 Roadmap
-
-### Version 1.1 (Q1 2024)
-- [ ] Patient portal integration
-- [ ] SMS/Email appointment reminders
-- [ ] Recurring appointment support
-- [ ] Advanced reporting dashboard
-
-### Version 1.2 (Q2 2024)
-- [ ] Multi-clinic support
-- [ ] Role-based access control
-- [ ] Integration with popular EMR systems
-- [ ] Mobile app (React Native)
-
-### Version 2.0 (Q3 2024)
-- [ ] AI-powered scheduling optimization
-- [ ] Telehealth integration
-- [ ] Advanced analytics and insights
-- [ ] FHIR compliance
-
-## 🛡 Security & Compliance
+## Security & Compliance
 
 SwasthiQ is designed with healthcare security standards in mind:
 
@@ -395,24 +514,11 @@ SwasthiQ is designed with healthcare security standards in mind:
 - **Session Management**: Secure session handling (when authentication is added)
 - **HIPAA Considerations**: Architecture supports HIPAA compliance requirements
 
-## 📞 Support & Contact
-
-### Getting Help
-- **Issues**: Report bugs via GitHub Issues
-- **Questions**: Open a GitHub Discussion
-- **Email**: shivangi.singh.dev@gmail.com
-
-### Connect with the Developer
-- **GitHub**: [@shivangi-singh-dev](https://github.com/shivangi-singh-dev)
-- **LinkedIn**: [Shivangi Singh](https://linkedin.com/in/shivangi-singh-dev)
-- **Portfolio**: [shivangisingh.dev](https://shivangisingh.dev)
-- **Twitter**: [@shivangi_dev](https://twitter.com/shivangi_dev)
-
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - **Healthcare Professionals**: For providing real-world requirements and feedback during development
 - **Open Source Community**: For the amazing tools and libraries that make SwasthiQ possible

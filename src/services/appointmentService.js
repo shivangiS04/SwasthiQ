@@ -10,51 +10,51 @@ class AppointmentService {
     return [
       {
         id: "apt_001",
-        patient_name: "John Smith",
+        patient_name: "Rajesh Kumar",
         date: "2024-12-27",
         time: "09:00",
         duration: 30,
-        doctor_name: "Dr. Sarah Johnson",
+        doctor_name: "Dr. Priya Sharma",
         status: "Confirmed",
         mode: "In-person"
       },
       {
         id: "apt_002",
-        patient_name: "Emily Davis",
+        patient_name: "Anita Patel",
         date: "2024-12-27",
         time: "10:30",
         duration: 45,
-        doctor_name: "Dr. Michael Chen",
+        doctor_name: "Dr. Arjun Mehta",
         status: "Scheduled",
         mode: "Virtual"
       },
       {
         id: "apt_003",
-        patient_name: "Robert Wilson",
+        patient_name: "Vikram Singh",
         date: "2024-12-28",
         time: "14:00",
         duration: 60,
-        doctor_name: "Dr. Sarah Johnson",
+        doctor_name: "Dr. Priya Sharma",
         status: "Upcoming",
         mode: "In-person"
       },
       {
         id: "apt_004",
-        patient_name: "Lisa Anderson",
+        patient_name: "Kavya Reddy",
         date: "2024-12-26",
         time: "11:15",
         duration: 30,
-        doctor_name: "Dr. James Rodriguez",
+        doctor_name: "Dr. Rohit Gupta",
         status: "Confirmed",
         mode: "Phone"
       },
       {
         id: "apt_005",
-        patient_name: "David Brown",
+        patient_name: "Amit Agarwal",
         date: "2024-12-29",
         time: "08:30",
         duration: 45,
-        doctor_name: "Dr. Michael Chen",
+        doctor_name: "Dr. Arjun Mehta",
         status: "Scheduled",
         mode: "Virtual"
       }

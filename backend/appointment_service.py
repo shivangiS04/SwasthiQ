@@ -1,5 +1,4 @@
 # SwasthiQ Appointment Management System - Backend Service
-# Core appointment management logic and business rules
 
 from dataclasses import dataclass
 from typing import List, Dict, Optional, Union
@@ -9,40 +8,21 @@ from appointment_validators import validate_appointment_data, validate_status_va
 
 @dataclass
 class Appointment:
-    """
-    Appointment data model representing a patient appointment
-    """
     id: str
     patient_name: str
-    date: str  # YYYY-MM-DD format
-    time: str  # HH:MM format
-    duration: int  # minutes
+    date: str
+    time: str
+    duration: int
     doctor_name: str
-    status: str  # Confirmed, Scheduled, Upcoming, Cancelled
-    mode: str   # In-person, Virtual, Phone
+    status: str
+    mode: str
 
 class AppointmentService:
-    """
-    Core service class for appointment management operations
-    Simulates database operations using in-memory data structures
-    """
-    
     def __init__(self):
         self.appointments: List[Appointment] = []
         self._initialize_mock_data()
     
     def _create_error_response(self, code: str, message: str, details: Optional[Dict] = None) -> Dict:
-        """
-        Create standardized error response
-        
-        Args:
-            code: Error code (VALIDATION_ERROR, CONFLICT_ERROR, NOT_FOUND)
-            message: Human-readable error message
-            details: Optional additional context
-            
-        Returns:
-            Error response dictionary
-        """
         return {
             "success": False,
             "error": {
@@ -53,22 +33,12 @@ class AppointmentService:
         }
     
     def _create_success_response(self, data: Union[Appointment, List[Appointment], bool]) -> Dict:
-        """
-        Create standardized success response
-        
-        Args:
-            data: Response data (appointment, list of appointments, or boolean)
-            
-        Returns:
-            Success response dictionary
-        """
         return {
             "success": True,
             "data": data
         }
     
     def _initialize_mock_data(self):
-        """Initialize with mock appointment data - at least 10 realistic appointments"""
         mock_appointments = [
             Appointment(
                 id="apt_001",

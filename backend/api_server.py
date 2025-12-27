@@ -1,8 +1,4 @@
 #!/usr/bin/env python3
-"""
-SwasthiQ Appointment Management API Server
-Provides HTTP endpoints for the React frontend to interact with the Python backend
-"""
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -11,16 +7,13 @@ import json
 from datetime import datetime
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for React frontend
+CORS(app)
 
-# Initialize the appointment service
 appointment_service = AppointmentService()
 
 @app.route('/api/appointments', methods=['GET'])
 def get_appointments():
-    """Get appointments with optional filtering"""
     try:
-        # Get query parameters
         filters = {}
         if request.args.get('date'):
             filters['date'] = request.args.get('date')
@@ -31,7 +24,6 @@ def get_appointments():
         
         appointments = appointment_service.get_appointments(filters)
         
-        # Convert appointments to dictionaries for JSON serialization
         appointments_data = []
         for apt in appointments:
             appointments_data.append({
@@ -61,7 +53,6 @@ def get_appointments():
 
 @app.route('/api/appointments', methods=['POST'])
 def create_appointment():
-    """Create a new appointment"""
     try:
         payload = request.get_json()
         
@@ -76,11 +67,9 @@ def create_appointment():
         
         result = appointment_service.create_appointment(payload)
         
-        # Check if result is an error response
         if isinstance(result, dict) and not result.get('success', True):
             return jsonify(result), 400
         
-        # Convert appointment to dictionary
         appointment_data = {
             'id': result.id,
             'patient_name': result.patient_name,
@@ -108,7 +97,6 @@ def create_appointment():
 
 @app.route('/api/appointments/<appointment_id>/status', methods=['PUT'])
 def update_appointment_status(appointment_id):
-    """Update appointment status"""
     try:
         payload = request.get_json()
         
@@ -126,11 +114,9 @@ def update_appointment_status(appointment_id):
             payload['status']
         )
         
-        # Check if result is an error response
         if isinstance(result, dict) and not result.get('success', True):
             return jsonify(result), 400
         
-        # Convert appointment to dictionary
         appointment_data = {
             'id': result.id,
             'patient_name': result.patient_name,
@@ -158,7 +144,6 @@ def update_appointment_status(appointment_id):
 
 @app.route('/api/appointments/<appointment_id>', methods=['DELETE'])
 def delete_appointment(appointment_id):
-    """Delete an appointment"""
     try:
         success = appointment_service.delete_appointment(appointment_id)
         
@@ -178,7 +163,6 @@ def delete_appointment(appointment_id):
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
-    """Health check endpoint"""
     return jsonify({
         'success': True,
         'message': 'SwasthiQ Appointment API is running',

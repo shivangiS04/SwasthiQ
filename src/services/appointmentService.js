@@ -1,16 +1,11 @@
-// Bridge service to connect React frontend with Python Flask API
-// This service makes HTTP requests to the Python backend
-
 class AppointmentService {
   constructor() {
-    // Use production API URL when deployed, localhost for development
     this.baseURL = process.env.NODE_ENV === 'production' 
-      ? 'https://swasthiq-api.onrender.com/api'  // Replace with your actual Render URL
+      ? 'https://swasthiq.onrender.com/api'
       : 'http://localhost:5000/api';
     this.demoMode = false;
   }
 
-  // Mock data for demo when API is unavailable
   getMockAppointments() {
     return [
       {
@@ -66,7 +61,6 @@ class AppointmentService {
     ];
   }
 
-  // Helper method to handle API responses
   async handleResponse(response) {
     const data = await response.json();
     
@@ -81,7 +75,6 @@ class AppointmentService {
     return data.data || data;
   }
 
-  // Get appointments with optional filtering
   async getAppointments(filters = {}) {
     try {
       const params = new URLSearchParams();
@@ -104,10 +97,8 @@ class AppointmentService {
       console.warn('API unavailable, switching to demo mode:', error.message);
       this.demoMode = true;
       
-      // Return mock data when API is unavailable (for live demo)
       let mockData = this.getMockAppointments();
       
-      // Apply filters to mock data
       if (filters.date) {
         mockData = mockData.filter(apt => apt.date === filters.date);
       }
@@ -122,7 +113,6 @@ class AppointmentService {
     }
   }
 
-  // Create a new appointment
   async createAppointment(payload) {
     try {
       const response = await fetch(`${this.baseURL}/appointments`, {
@@ -140,7 +130,6 @@ class AppointmentService {
     }
   }
 
-  // Update appointment status
   async updateAppointmentStatus(id, newStatus) {
     try {
       const response = await fetch(`${this.baseURL}/appointments/${id}/status`, {
@@ -158,7 +147,6 @@ class AppointmentService {
     }
   }
 
-  // Delete an appointment
   async deleteAppointment(id) {
     try {
       const response = await fetch(`${this.baseURL}/appointments/${id}`, {
@@ -173,7 +161,6 @@ class AppointmentService {
     }
   }
 
-  // Health check for API connectivity
   async healthCheck() {
     try {
       const response = await fetch(`${this.baseURL}/health`);
@@ -186,6 +173,5 @@ class AppointmentService {
   }
 }
 
-// Create singleton instance
 const appointmentService = new AppointmentService();
 export default appointmentService;

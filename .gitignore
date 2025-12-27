@@ -132,3 +132,4 @@ temp/
 
 # Old AI tool directories (replaced with .projects)
 .kiro/
+.vercel

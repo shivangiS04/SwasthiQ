@@ -3,7 +3,67 @@
 
 class AppointmentService {
   constructor() {
-    this.baseURL = 'http://localhost:5000/api';
+    // Use production API URL when deployed, localhost for development
+    this.baseURL = process.env.NODE_ENV === 'production' 
+      ? 'https://swasthiq-api.onrender.com/api'  // Replace with your actual Render URL
+      : 'http://localhost:5000/api';
+    this.demoMode = false;
+  }
+
+  // Mock data for demo when API is unavailable
+  getMockAppointments() {
+    return [
+      {
+        id: "apt_001",
+        patient_name: "John Smith",
+        date: "2024-12-27",
+        time: "09:00",
+        duration: 30,
+        doctor_name: "Dr. Sarah Johnson",
+        status: "Confirmed",
+        mode: "In-person"
+      },
+      {
+        id: "apt_002",
+        patient_name: "Emily Davis",
+        date: "2024-12-27",
+        time: "10:30",
+        duration: 45,
+        doctor_name: "Dr. Michael Chen",
+        status: "Scheduled",
+        mode: "Virtual"
+      },
+      {
+        id: "apt_003",
+        patient_name: "Robert Wilson",
+        date: "2024-12-28",
+        time: "14:00",
+        duration: 60,
+        doctor_name: "Dr. Sarah Johnson",
+        status: "Upcoming",
+        mode: "In-person"
+      },
+      {
+        id: "apt_004",
+        patient_name: "Lisa Anderson",
+        date: "2024-12-26",
+        time: "11:15",
+        duration: 30,
+        doctor_name: "Dr. James Rodriguez",
+        status: "Confirmed",
+        mode: "Phone"
+      },
+      {
+        id: "apt_005",
+        patient_name: "David Brown",
+        date: "2024-12-29",
+        time: "08:30",
+        duration: 45,
+        doctor_name: "Dr. Michael Chen",
+        status: "Scheduled",
+        mode: "Virtual"
+      }
+    ];
   }
 
   // Helper method to handle API responses
@@ -41,8 +101,24 @@ class AppointmentService {
       
       return await this.handleResponse(response);
     } catch (error) {
-      console.error('Error fetching appointments:', error);
-      throw error;
+      console.warn('API unavailable, switching to demo mode:', error.message);
+      this.demoMode = true;
+      
+      // Return mock data when API is unavailable (for live demo)
+      let mockData = this.getMockAppointments();
+      
+      // Apply filters to mock data
+      if (filters.date) {
+        mockData = mockData.filter(apt => apt.date === filters.date);
+      }
+      if (filters.status) {
+        mockData = mockData.filter(apt => apt.status === filters.status);
+      }
+      if (filters.doctor_name) {
+        mockData = mockData.filter(apt => apt.doctor_name === filters.doctor_name);
+      }
+      
+      return mockData;
     }
   }
 
@@ -103,8 +179,9 @@ class AppointmentService {
       const response = await fetch(`${this.baseURL}/health`);
       return await this.handleResponse(response);
     } catch (error) {
-      console.error('API health check failed:', error);
-      throw error;
+      console.warn('API health check failed, demo mode available:', error.message);
+      this.demoMode = true;
+      return { status: 'demo', message: 'Running in demo mode with mock data' };
     }
   }
 }

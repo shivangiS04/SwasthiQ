@@ -2,19 +2,10 @@
 
 > **SwasthiQ** (स्वास्थ्य + IQ) combines the Sanskrit word for "health" with "Intelligence Quotient", representing intelligent healthcare management solutions for medical providers worldwide.
 
-A modern, full-stack appointment management platform designed specifically for healthcare providers. Built with React and Python , SwasthiQ offers real-time scheduling, intelligent conflict detection, and a professional user interface optimized for medical workflows.
+A modern, full-stack appointment management platform designed specifically for healthcare providers. Built with React and Python by **Shivangi Singh**, SwasthiQ offers real-time scheduling, intelligent conflict detection, and a professional user interface optimized for medical workflows.
 
+🌐 **Live Demo**: [https://swasthi-q.vercel.app](https://swasthi-q.vercel.app)
 
-
-## 🌟 Why SwasthiQ?
-
-Healthcare providers need reliable, efficient tools to manage patient appointments. SwasthiQ addresses common pain points in medical practice management:
-
-- **Double Booking Prevention**: Intelligent conflict detection prevents scheduling overlaps
-- **Real-time Updates**: Instant status changes across all connected devices  
-- **Professional Interface**: Clean, medical-grade UI designed for healthcare workflows
-- **Comprehensive Filtering**: Find appointments quickly by date, status, or provider
-- **Mobile Responsive**: Works seamlessly on tablets and mobile devices used in clinical settings
 
 ## Key Features
 
@@ -37,7 +28,7 @@ Healthcare providers need reliable, efficient tools to manage patient appointmen
 - **Error Recovery**: Intelligent error handling with retry mechanisms
 - **Connection Monitoring**: Real-time API connection status
 
-## 🛠 Technology Stack
+## Technology Stack
 
 ### Frontend Architecture
 ```
@@ -79,13 +70,13 @@ GitHub Actions        → CI/CD pipeline (optional)
 - **Network**: HTTPS support recommended
 - **Browser**: Modern browsers (Chrome 90+, Firefox 88+, Safari 14+)
 
-## 🚀 Quick Start Guide
+##  Quick Start Guide
 
 ### 1. Project Setup
 ```bash
 # Clone the repository
-git clone https://github.com/shivangi-singh-dev/swasthiq-appointment-system.git
-cd swasthiq-appointment-system
+git clone https://github.com/shivangiS04/SwasthiQ.git
+cd SwasthiQ
 
 # Install frontend dependencies
 npm install
@@ -115,7 +106,7 @@ npm run dev
 - You should see the SwasthiQ dashboard with sample appointments
 - Test creating a new appointment to verify full functionality
 
-## 🧪 Testing & Quality Assurance
+## Testing & Quality Assurance
 
 SwasthiQ includes comprehensive testing to ensure reliability in healthcare environments.
 

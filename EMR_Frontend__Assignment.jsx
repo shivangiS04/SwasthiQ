@@ -29,17 +29,20 @@ const AppointmentManagementView = () => {
 
   const checkConnection = async () => {
     try {
-      await appointmentService.healthCheck()
-      setConnectionStatus('connected')
+      const result = await appointmentService.healthCheck()
+      if (result.status === 'demo') {
+        setConnectionStatus('demo')
+      } else {
+        setConnectionStatus('connected')
+      }
     } catch (err) {
-      setConnectionStatus('disconnected')
-      setError('Unable to connect to the appointment service. Please ensure the API server is running on port 5000.')
+      setConnectionStatus('demo')
     }
   }
 
   // Load appointments on component mount
   useEffect(() => {
-    if (connectionStatus === 'connected') {
+    if (connectionStatus === 'connected' || connectionStatus === 'demo') {
       loadAppointments()
     }
   }, [connectionStatus])
@@ -230,37 +233,30 @@ const AppointmentManagementView = () => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
       {/* Connection Status Indicator */}
-      {connectionStatus !== 'connected' && (
+      {connectionStatus === 'demo' && (
         <div className="lg:col-span-4 mb-4">
-          {connectionStatus === 'checking' ? (
-            <div className="bg-yellow-900 border border-yellow-700 text-yellow-100 px-4 py-3 rounded-lg">
-              <div className="flex items-center">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-yellow-400 mr-3"></div>
-                <span className="font-bold">Checking connection to appointment service...</span>
+          <div className="bg-blue-900 border border-blue-700 text-blue-100 px-4 py-3 rounded-lg">
+            <div className="flex items-start">
+              <div className="bg-blue-800 rounded-full p-1 mr-3 mt-0.5">
+                <Calendar className="w-4 h-4" />
+              </div>
+              <div>
+                <p className="font-bold">Demo Mode Active</p>
+                <p>Displaying sample appointment data for demonstration purposes.</p>
+                <p className="text-sm mt-1">Full backend API available when running locally with Python Flask server.</p>
               </div>
             </div>
-          ) : (
-            <div className="bg-red-900 border border-red-700 text-red-100 px-4 py-3 rounded-lg">
-              <div className="flex items-start justify-between">
-                <div className="flex items-start">
-                  <div className="bg-red-800 rounded-full p-1 mr-3 mt-0.5">
-                    <X className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <p className="font-bold">Connection Failed</p>
-                    <p>Unable to connect to the appointment service.</p>
-                    <p className="text-sm mt-1">Please ensure the Python API server is running on port 5000.</p>
-                  </div>
-                </div>
-                <button 
-                  onClick={checkConnection}
-                  className="text-sm bg-red-800 hover:bg-red-700 px-3 py-1 rounded transition-colors"
-                >
-                  Retry Connection
-                </button>
-              </div>
+          </div>
+        </div>
+      )}
+      {connectionStatus === 'checking' && (
+        <div className="lg:col-span-4 mb-4">
+          <div className="bg-yellow-900 border border-yellow-700 text-yellow-100 px-4 py-3 rounded-lg">
+            <div className="flex items-center">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-yellow-400 mr-3"></div>
+              <span className="font-bold">Checking connection to appointment service...</span>
             </div>
-          )}
+          </div>
         </div>
       )}
       {/* Error Display */}

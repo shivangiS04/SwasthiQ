@@ -2,41 +2,14 @@
 
 > **SwasthiQ** (स्वास्थ्य + IQ) combines the Sanskrit word for "health" with "Intelligence Quotient", representing intelligent healthcare management solutions for Indian medical providers.
 
-A modern, full-stack appointment management platform designed specifically for Indian healthcare providers. Built with React and Python by **Shivangi Singh**, SwasthiQ offers real-time scheduling, intelligent conflict detection, and a professional user interface optimized for Indian medical workflows.
+A modern, full-stack appointment management platform designed specifically for Indian healthcare providers. Built with React and Python, SwasthiQ offers real-time scheduling, intelligent conflict detection, and a professional user interface optimized for Indian medical workflows.
 
 🌐 **Live Demo**: [https://swasthi-q.vercel.app](https://swasthi-q.vercel.app)  
 🔗 **Backend API**: [https://swasthiq.onrender.com/api](https://swasthiq.onrender.com/api)  
 🏥 **Health Check**: [https://swasthiq.onrender.com/api/health](https://swasthiq.onrender.com/api/health)
 
-![SwasthiQ Dashboard](https://img.shields.io/badge/Status-Live%20Production-brightgreen)
-![React](https://img.shields.io/badge/React-18.2.0-blue)
-![Python](https://img.shields.io/badge/Python-3.13.4-green)
-![Tests](https://img.shields.io/badge/Tests-31%20Passing-success)
 
-## 👩‍💻 About the Developer
-
-**Shivangi Singh** is a passionate full-stack developer specializing in healthcare technology solutions for the Indian market. This project showcases expertise in:
-
-- **Frontend Development**: React, JavaScript, Tailwind CSS, Modern UI/UX
-- **Backend Development**: Python, Flask, RESTful APIs, Data Modeling
-- **Testing**: Comprehensive test suites with Jest, Pytest, and Property-based testing
-- **Healthcare Domain**: Understanding of Indian medical workflows and EMR systems
-- **Professional Development**: Clean architecture, documentation, and best practices
-
-*Connect with Shivangi: [GitHub](https://github.com/shivangiS04) | [LinkedIn](https://linkedin.com/in/shivangi-singh-dev) | [Email](mailto:shivangi.singh.dev@gmail.com)*
-
-## 🇮🇳 Why SwasthiQ for Indian Healthcare?
-
-Indian healthcare providers need reliable, culturally-appropriate tools to manage patient appointments. SwasthiQ addresses common challenges in Indian medical practice management:
-
-- **Multi-language Support**: Designed for Indian names and cultural context
-- **Conflict Prevention**: Intelligent scheduling prevents double-booking across busy Indian clinics
-- **Real-time Updates**: Instant status changes for high-volume Indian healthcare environments
-- **Professional Interface**: Clean, medical-grade UI following Indian healthcare standards
-- **Comprehensive Filtering**: Find appointments quickly by date, status, or doctor
-- **Mobile Responsive**: Works on tablets and mobile devices commonly used in Indian clinics
-
-## 🚀 Key Features
+## Key Features
 
 ### Core Appointment Management
 - **Smart Scheduling**: Create appointments with automatic conflict detection
@@ -57,7 +30,7 @@ Indian healthcare providers need reliable, culturally-appropriate tools to manag
 - **Error Recovery**: Intelligent error handling with retry mechanisms
 - **Connection Monitoring**: Real-time API connection status
 
-## 🛠 Technology Stack
+##  Technology Stack
 
 ### Frontend Architecture
 ```
@@ -99,7 +72,7 @@ Docker                → Containerization support
 - **Network**: HTTPS support
 - **Browser**: Modern browsers (Chrome 90+, Firefox 88+, Safari 14+)
 
-## 🚀 Quick Start Guide
+## Quick Start Guide
 
 ### 1. Project Setup
 ```bash
@@ -136,7 +109,7 @@ npm run dev
 - You should see the SwasthiQ dashboard with Indian patient and doctor names
 - Test creating a new appointment to verify full functionality
 
-## 🧪 Testing & Quality Assurance
+## Testing & Quality Assurance
 
 SwasthiQ includes comprehensive testing to ensure reliability in Indian healthcare environments.
 
@@ -159,17 +132,7 @@ npm run test:watch
 - **API Integration**: End-to-end workflow testing
 - **Edge Cases**: Boundary conditions and error scenarios
 
-### Quality Metrics
-```
-✅ 31/31 Backend tests passing
-✅ All frontend component tests passing  
-✅ 100% API endpoint coverage
-✅ Property-based testing for data validation
-✅ Cross-browser compatibility verified
-✅ Indian healthcare workflow tested
-```
-
-## 📊 API Documentation
+## API Documentation
 
 ### Base URLs
 ```
@@ -232,7 +195,7 @@ All API responses follow this structure:
 }
 ```
 
-## 🔄 GraphQL Query Structure & Data Consistency
+## GraphQL Query Structure & Data Consistency
 
 ### Technical Architecture Decision: REST vs GraphQL
 
@@ -384,7 +347,7 @@ def create_appointment(self, payload: Dict):
     return new_appointment
 ```
 
-## 🏗 Project Structure
+## Project Structure
 
 ```
 SwasthiQ/
@@ -446,7 +409,7 @@ docker build -t swasthiq .
 docker run -p 3000:3000 -p 5000:5000 swasthiq
 ```
 
-## 🔐 Security & Compliance
+## Security & Compliance
 
 SwasthiQ is designed with Indian healthcare security standards in mind:
 
@@ -456,66 +419,17 @@ SwasthiQ is designed with Indian healthcare security standards in mind:
 - **Session Management**: Secure session handling ready for authentication
 - **HIPAA Considerations**: Architecture supports healthcare compliance requirements
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
-
-- **Indian Healthcare Professionals**: For providing real-world requirements and feedback
-- **Open Source Community**: For the amazing tools and libraries that make SwasthiQ possible
-- **Mentors and Peers**: For guidance and code reviews throughout development
-- **Beta Testers**: Early users who helped refine the user experience for Indian healthcare
-
-## 🏆 Project Highlights
-
-This project demonstrates:
-- **Full-Stack Proficiency**: End-to-end development from database design to user interface
-- **Healthcare Domain Knowledge**: Understanding of Indian medical workflows and EMR requirements
-- **Modern Development Practices**: Clean architecture, comprehensive testing, and documentation
-- **Production Quality**: Live deployment with proper error handling and security
-- **Cultural Awareness**: Designed specifically for Indian healthcare providers
-
-## 📊 Assignment Compliance
-
-### SDE Intern Assignment Requirements ✅
-
-#### Task 1: Backend Service Implementation
-- ✅ **Data Mocking**: 12 mock appointments with Indian names and context
-- ✅ **Query Function**: `get_appointments(filters)` with date, status, doctor filtering
-- ✅ **Mutation Function**: `update_appointment_status(id, new_status)` with AppSync comments
-- ✅ **Create Function**: `create_appointment(payload)` with validation & conflict detection
-- ✅ **Delete Function**: `delete_appointment(id)` implemented
-- ✅ **Data Consistency**: Comprehensive explanation above
-
-#### Task 2: Frontend Integration
-- ✅ **Data Fetching**: React hooks with API integration
-- ✅ **Calendar Filtering**: Date selection with backend calls
-- ✅ **Tab Filtering**: Upcoming, Today, Past logic
-- ✅ **Status Update**: Real-time updates with backend
-- ✅ **Create Appointment**: Full form with backend integration
 
 #### Submission Guidelines
-- ✅ **Single Repository**: https://github.com/shivangiS04/SwasthiQ
-- ✅ **Frontend File**: `EMR_Frontend__Assignment.jsx`
-- ✅ **Backend File**: `appointment_service.py`
-- ✅ **Live Link**: https://swasthi-q.vercel.app
-- ✅ **Technical Explanation**: GraphQL structure and data consistency (above)
+- **Single Repository**: https://github.com/shivangiS04/SwasthiQ
+- **Frontend File**: `EMR_Frontend__Assignment.jsx`
+- **Backend File**: `appointment_service.py`
+- **Live Link**: https://swasthi-q.vercel.app
 
 ---
 
 **Developed with ❤️ by Shivangi Singh for Indian healthcare providers**
-
-*SwasthiQ - Where Health Meets Intelligence*
-
----
-
-### 📊 Project Stats
-- **Lines of Code**: 5,000+ (Frontend + Backend)
-- **Test Coverage**: 90%+ across all modules
-- **Development Time**: 3 weeks of focused development
-- **Technologies Used**: 10+ modern web technologies
-- **Features Implemented**: 15+ core features with comprehensive testing
-- **Deployment**: Full-stack production deployment
-
-*This project showcases modern full-stack development skills and is ready for production use in Indian healthcare facilities.*
